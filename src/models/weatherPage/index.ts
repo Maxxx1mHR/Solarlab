@@ -20,22 +20,67 @@ export const WeatherGate = createGate();
 export const $addressSuggestion = weatherDomain.createStore<Addresses[] | null>(null);
 export const $weather = weatherDomain.createStore<WeatherUi | null>(null);
 export const $addressSelect = weatherDomain.createStore<string>('');
+export const $addressHistory = weatherDomain.createStore<Addresses[]>([]);
 
 // Events
 export const addressSearched = weatherDomain.createEvent<string>();
-export const addressSelected = weatherDomain.createEvent<{
-  label: string;
-  value: {
-    lat: string;
-    lon: string;
-  };
-}>();
+export const addressSelected = weatherDomain.createEvent<Addresses>();
+export const addressHistoryCleared = weatherDomain.createEvent();
+export const addressFromHistorySelected = weatherDomain.createEvent<Addresses>();
+
+export const mapSelected = weatherDomain.createEvent<[number, number]>();
 
 // Effects
 export const addressSuggestionFx = weatherDomain.createEffect(getAddressSuggestion);
 export const weatherFx = weatherDomain.createEffect(getWeather);
 
+export const locateFx = weatherDomain.createEffect<
+  void,
+  {lat: number; lon: number},
+  GeolocationPositionError
+>(
+  () =>
+    new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        return reject(new Error('Геолокация не поддерживается'));
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) =>
+          resolve({
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+          }),
+        (error) => reject(error),
+      );
+    }),
+);
+
+export const clearHistoryFx = weatherDomain.createEffect(() => {
+  localStorage.removeItem('addressesSuggestion');
+});
+
 // Logic
+
+sample({
+  clock: WeatherGate.open,
+  target: locateFx,
+});
+
+// sample({
+//   clock: WeatherGate.open,
+//   fn: () => JSON.parse(localStorage.getItem('addressesSuggestion') ?? '[]') as Addresses[],
+//   target: $addressHistory,
+// });
+
+export const $coords = weatherDomain
+  .createStore<{lat: string; lon: string} | null>(null)
+  .on(locateFx.doneData, (_, {lat, lon}) => ({
+    lat: lat.toString(),
+    lon: lon.toString(),
+  }));
+
+$coords.watch((e) => console.log('123', e));
+
 sample({
   source: addressSearched,
   fn: (addressSource) => ({
@@ -73,6 +118,36 @@ sample({
   target: weatherFx,
 });
 
+// sample({
+//   clock: addressSelected,
+//   target: $addressHistory
+// })
+
+$addressHistory
+  .on(addressSelected, (state, payload) => [...state, payload])
+  .on(
+    WeatherGate.open,
+    () => JSON.parse(localStorage.getItem('addressesSuggestion') ?? '[]') as Addresses[],
+  )
+  .on(addressHistoryCleared, () => []);
+
+sample({
+  clock: mapSelected,
+  fn: (map) => ({
+    lat: map[0].toString(),
+    lon: map[1].toString(),
+  }),
+  target: weatherFx,
+});
+sample({
+  clock: addressFromHistorySelected,
+  fn: (address) => ({
+    lat: address.value.lat,
+    lon: address.value.lon,
+  }),
+  target: weatherFx,
+});
+
 $addressSelect.on(addressSelected, (_, payload) => payload.label);
 
 sample({
@@ -93,4 +168,9 @@ sample({
 
 export const $weatherState = combine({
   weatherLoading: weatherFx.pending,
+});
+
+sample({
+  clock: addressHistoryCleared,
+  target: clearHistoryFx,
 });
