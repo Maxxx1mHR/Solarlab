@@ -3,6 +3,8 @@ import {createGate} from 'effector-react';
 import {getAddressSuggestion} from '../../services/addressService';
 import {getWeather} from '../../services/weatherService';
 import type {WeatherUi} from '../../types';
+import {toast} from 'react-toastify';
+import {message} from 'antd';
 
 export interface Addresses {
   label: string;
@@ -27,12 +29,24 @@ export const addressSearched = weatherDomain.createEvent<string>();
 export const addressSelected = weatherDomain.createEvent<Addresses>();
 export const addressHistoryCleared = weatherDomain.createEvent();
 export const addressFromHistorySelected = weatherDomain.createEvent<Addresses>();
+export const geolocationSearched = weatherDomain.createEvent();
 
 export const mapSelected = weatherDomain.createEvent<[number, number]>();
 
 // Effects
 export const addressSuggestionFx = weatherDomain.createEffect(getAddressSuggestion);
 export const weatherFx = weatherDomain.createEffect(getWeather);
+export const locateErrorFx = weatherDomain.createEffect(
+  (error: {code: number; message: string}) => {
+    if (error.code === 1) {
+      return toast.error(
+        'Геолокация отключена. Разрешите определение местоположения в настройках браузера',
+      );
+    } else {
+      return toast.error(`Что-то пошло не так, попробуйте еще раз ${message}`);
+    }
+  },
+);
 
 export const locateFx = weatherDomain.createEffect<
   void,
@@ -62,24 +76,27 @@ export const clearHistoryFx = weatherDomain.createEffect(() => {
 // Logic
 
 sample({
-  clock: WeatherGate.open,
+  clock: geolocationSearched,
+  // clock: WeatherGate.open,
   target: locateFx,
 });
 
-// sample({
-//   clock: WeatherGate.open,
-//   fn: () => JSON.parse(localStorage.getItem('addressesSuggestion') ?? '[]') as Addresses[],
-//   target: $addressHistory,
-// });
-
 export const $coords = weatherDomain
-  .createStore<{lat: string; lon: string} | null>(null)
+  .createStore<{lat: string; lon: string}>({lat: '', lon: ''})
   .on(locateFx.doneData, (_, {lat, lon}) => ({
     lat: lat.toString(),
     lon: lon.toString(),
   }));
 
-$coords.watch((e) => console.log('123', e));
+// $coords.watch((e) => console.log('123', e));
+sample({
+  clock: locateFx.failData,
+  fn: (err) => {
+    console.log('er', err);
+    return err;
+  },
+  target: locateErrorFx,
+});
 
 sample({
   source: addressSearched,
@@ -145,6 +162,11 @@ sample({
     lat: address.value.lat,
     lon: address.value.lon,
   }),
+  target: weatherFx,
+});
+
+sample({
+  clock: $coords,
   target: weatherFx,
 });
 
