@@ -47,6 +47,12 @@ export const locateErrorFx = weatherDomain.createEffect(
     }
   },
 );
+export const addressSuggestionErrorFx = weatherDomain.createEffect(() =>
+  toast.error('Что-то пошло не так, попробуйте еще раз'),
+);
+export const weatherErrorFx = weatherDomain.createEffect(() =>
+  toast.error('Что-то пошло не так, попробуйте еще раз'),
+);
 
 export const locateFx = weatherDomain.createEffect<
   void,
@@ -88,14 +94,17 @@ export const $coords = weatherDomain
     lon: lon.toString(),
   }));
 
-// $coords.watch((e) => console.log('123', e));
 sample({
   clock: locateFx.failData,
-  fn: (err) => {
-    console.log('er', err);
-    return err;
-  },
   target: locateErrorFx,
+});
+sample({
+  clock: addressSuggestionFx.fail,
+  target: addressSuggestionErrorFx,
+});
+sample({
+  clock: weatherFx.fail,
+  target: weatherErrorFx,
 });
 
 sample({
@@ -134,11 +143,6 @@ sample({
   },
   target: weatherFx,
 });
-
-// sample({
-//   clock: addressSelected,
-//   target: $addressHistory
-// })
 
 $addressHistory
   .on(addressSelected, (state, payload) => [...state, payload])

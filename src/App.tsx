@@ -12,10 +12,12 @@ import {Footer} from './components/Footer';
 function App() {
   useGate(WeatherGate);
 
+  const API_KEY = import.meta.env.VITE_YANDEX_API_KEY;
+
   return (
     <>
       <ToastContainer />
-      <YMaps query={{apikey: '757e65ef-d71b-4780-a37b-994888e4d37a'}}>
+      <YMaps query={{apikey: API_KEY}}>
         <Layout style={{height: '100vh'}}>
           <Header />
           <Content />

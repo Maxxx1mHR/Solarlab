@@ -16,7 +16,9 @@ export const Content = () => {
       <AddressHistorySelect />
       <Flex gap='large'>
         <Flex vertical>
-          <Typography.Title level={2}>Данные о погоде</Typography.Title>
+          <Typography.Title level={3} style={{textAlign: 'center'}}>
+            Данные о погоде
+          </Typography.Title>
           {addressSelect && !weatherState.weatherLoading && !weather && 'Ничего не найдено'}
           {!addressSelect && !weather && (
             <Flex vertical>

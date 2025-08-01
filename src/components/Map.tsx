@@ -9,10 +9,10 @@ interface IMapClickEvent {
 
 export const Map = () => {
   return (
-    <div style={{width: '100%', height: 'calc(100vh - 200px)'}}>
+    <div style={{width: '100%', height: 'calc(100vh - 260px)'}}>
       <YandexMap
         width='100%'
-        height='calc(100vh - 200px)'
+        height='calc(100vh - 260px)'
         defaultState={{center: [55.75, 37.57], zoom: 9}}
         onClick={(e: IMapClickEvent) => {
           const coords = e.get('coords');
