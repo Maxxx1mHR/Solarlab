@@ -15,21 +15,43 @@ import { FormsModule } from '@angular/forms';
 })
 export class Photos {
   // photos!: Observable<Photo[]>;
-  photos!: PhotosResponse;
+  photos: PhotosResponse | null = null;
 
-  test = '';
+  searchQuery = '';
   testFn!: (value: string) => void;
 
+  page = 1;
+  per_page = 10;
+
   constructor(private api: UnsplashService) {
-    this.testFn = this.debounce(this.onInput, 2000);
+    this.testFn = this.debounce(this.onInput, 200);
   }
 
   ngOnInit(): void {
-    this.api
-      .getPhotos()
-      .subscribe({ next: (data: PhotosResponse) => (this.photos = data) });
+    this.loadPhotos();
+    // if (this.test.trim()) {
+    //   this.searchPhotos();
+    // } else {
+    //   this.loadPhotos();
+    // }
+  }
 
-    console.log('ph', this.photos);
+  private loadPhotos() {
+    this.api.getPhotos(this.page, this.per_page).subscribe({
+      next: (data: PhotosResponse) => {
+        this.photos = data;
+      },
+    });
+  }
+  private searchPhotos() {
+    console.log('!!!!', this.searchQuery);
+    this.api
+      .searchPhotos(this.page, this.per_page, this.searchQuery)
+      .subscribe({
+        next: (data: PhotosResponse) => {
+          this.photos = data;
+        },
+      });
   }
 
   debounce = <T extends string[]>(fn: (...args: T) => void, ms: number) => {
@@ -44,7 +66,21 @@ export class Photos {
     };
   };
 
-  onInput(value: string): void {
-    console.log('test через ngModel и (input):', value);
+  onInput = (value: string): void => {
+    // console.log('test через ngModel и (input):', value);
+    // console.log('searchQuery,', this.searchQuery);
+    this.searchQuery.trim() ? this.searchPhotos() : this.loadPhotos();
+  };
+
+  nextPage() {
+    this.page = this.page + 1;
+    this.loadPhotos();
+    this.searchQuery.trim() ? this.searchPhotos() : this.loadPhotos();
+  }
+
+  prevPage() {
+    this.page = this.page - 1;
+    this.loadPhotos();
+    this.searchQuery.trim() ? this.searchPhotos() : this.loadPhotos();
   }
 }

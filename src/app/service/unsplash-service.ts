@@ -5,7 +5,7 @@ import {
   HttpResponse,
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { environment } from '../environments/environment';
 import { catchError, map, Observable, retry, throwError } from 'rxjs';
 
 export interface Photo {
@@ -138,10 +138,16 @@ export interface Photo {
 
 // export interface PhotosResponse {}
 
-export type PhotosResponse = {
+export interface PhotosResponse {
   data: Photo[];
   page: number;
-};
+}
+
+export interface SearchPhotosResponse {
+  total: number;
+  total_pages: number;
+  results: Photo[];
+}
 
 @Injectable({
   providedIn: 'root',
@@ -150,6 +156,7 @@ export class UnsplashService {
   constructor(private http: HttpClient) {}
 
   private baseUrl = environment.apiBase;
+  private searchUrl = environment.apiSearch;
 
   getPhotos(
     page: number = 1,
@@ -185,7 +192,41 @@ export class UnsplashService {
       );
   }
 
-  searchPhotos() {}
+  searchPhotos(
+    page: number = 1,
+    per_page: number = 10,
+    query: string = 'nature'
+  ): Observable<PhotosResponse> {
+    return this.http
+      .get<SearchPhotosResponse>(this.searchUrl, {
+        observe: 'response',
+        params: {
+          page: page.toString(),
+          per_page: per_page.toString(),
+          query,
+        },
+      })
+      .pipe(
+        retry(1),
+        map((resp: HttpResponse<SearchPhotosResponse>) => {
+          let responseMap;
+          // const linkHeader = resp.headers.get('Link') || '';
+          // console.log('test', resp);
+          // console.log('linkHeader', linkHeader);
+
+          // const page = parseLinkHeader(linkHeader);
+          // console.log('page', page);
+          // console.log('resp', resp.body);
+
+          responseMap = {
+            data: resp.body?.results ?? [],
+            page: resp.body?.total_pages ?? 0,
+          };
+
+          return responseMap ?? [];
+        })
+      );
+  }
 
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {

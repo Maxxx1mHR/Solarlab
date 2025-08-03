@@ -11,11 +11,28 @@
 </ng-container>
 <ng-template #loading>Загрузка...</ng-template> -->
 
-<input type="text" [(ngModel)]="test" (input)="testFn(test)" />
 <div *ngIf="photos">
-  <div *ngFor="let photo of photos.data">
-    <div>
-      <img [src]="photo.urls.thumb" alt="image" />
+  <input type="text" [(ngModel)]="searchQuery" (input)="testFn(searchQuery)" />
+  <div *ngIf="photos">
+    <div class="wrapper">
+      <div *ngFor="let photo of photos.data">
+        <div class="card">
+          <img [src]="photo.urls.thumb" alt="image" class="cardImg" />
+          <div>
+            <ul class="list">
+              <li class="item">
+                <img src="assets/icons/liked.svg" alt="view" />
+                <div class="item-description">{{ photo.likes }}</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+  <div>
+    <div>page:{{ page }} / {{ photos.page }}</div>
+    <button (click)="prevPage()" [disabled]="page === 1">prev</button>
+    <button (click)="nextPage()">next</button>
   </div>
 </div>

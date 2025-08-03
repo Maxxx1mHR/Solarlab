@@ -1,0 +1,31 @@
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.card {
+  width: 140px;
+  border: 1px solid #233261;
+  border-radius: 10px;
+}
+
+.cardImg {
+  width: 140px;
+  height: 200px;
+  border-radius: 10px 10px 0 0;
+}
+
+.list {
+  display: flex;
+  list-style-type: none;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  gap: 3px;
+}
