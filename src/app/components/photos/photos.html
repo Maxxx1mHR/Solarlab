@@ -1,38 +1,42 @@
-<!-- <ng-container *ngIf="photos | async as photos; else loading">
-  <div class="grid">
-    <div *ngFor="let p of photos" class="photo-card">
-      <img [src]="p.urls.small" [alt]="p.alt_description || 'photo'" />
-      <div class="meta">
-        <div>{{ p.user.name }}</div>
-        <div>{{ p.description || p.alt_description }}</div>
-      </div>
-    </div>
-  </div>
-</ng-container>
-<ng-template #loading>Загрузка...</ng-template> -->
-
-<div *ngIf="photos">
-  <input type="text" [(ngModel)]="searchQuery" (input)="testFn(searchQuery)" />
-  <div *ngIf="photos">
-    <div class="wrapper">
-      <div *ngFor="let photo of photos.data">
-        <div class="card">
-          <img [src]="photo.urls.thumb" alt="image" class="cardImg" />
-          <div>
-            <ul class="list">
-              <li class="item">
-                <img src="assets/icons/liked.svg" alt="view" />
-                <div class="item-description">{{ photo.likes }}</div>
-              </li>
-            </ul>
+<nz-layout class="layout">
+  <nz-header>
+    <input
+      nz-input
+      placeholder="Поиск фото "
+      [(ngModel)]="searchQuery"
+      (input)="handleInput(searchQuery)"
+    />
+  </nz-header>
+  <nz-content class="content">
+    <div *ngIf="photos">
+      <div *ngIf="photos">
+        <div class="wrapper">
+          <div *ngFor="let photo of photos.data">
+            <div class="card">
+              <img [src]="photo.urls.thumb" alt="image" class="cardImg" />
+              <div>
+                <ul class="list">
+                  <li class="item">
+                    <img src="assets/icons/liked.svg" alt="view" />
+                    <div class="item-description">{{ photo.likes }}</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div>
-    <div>page:{{ page }} / {{ photos.page }}</div>
-    <button (click)="prevPage()" [disabled]="page === 1">prev</button>
-    <button (click)="nextPage()">next</button>
-  </div>
-</div>
+  </nz-content>
+  <nz-footer>
+    <nz-pagination
+      [nzPageIndex]="page"
+      [nzTotal]="totalItems()"
+      [nzPageSize]="per_page"
+      (nzPageIndexChange)="changePage($event)"
+      nzShowSizeChanger
+      [nzPageSizeOptions]="[10, 25]"
+      (nzPageSizeChange)="changePageSize($event)"
+    ></nz-pagination
+  ></nz-footer>
+</nz-layout>

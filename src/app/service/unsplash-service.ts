@@ -1,7 +1,6 @@
 import {
   HttpClient,
   HttpErrorResponse,
-  HttpHeaders,
   HttpResponse,
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -136,8 +135,6 @@ export interface Photo {
   };
 }
 
-// export interface PhotosResponse {}
-
 export interface PhotosResponse {
   data: Photo[];
   page: number;
@@ -175,20 +172,15 @@ export class UnsplashService {
         map((resp: HttpResponse<Photo[]>) => {
           let responseMap;
           const linkHeader = resp.headers.get('Link') || '';
-          console.log('test', resp);
-          console.log('linkHeader', linkHeader);
-
           const page = parseLinkHeader(linkHeader);
-          console.log('page', page);
-          console.log('resp', resp.body);
-
           responseMap = {
             data: resp.body ?? [],
             page: page['last'] ?? 0,
           };
 
           return responseMap ?? [];
-        })
+        }),
+        catchError(this.handleError)
       );
   }
 
@@ -210,25 +202,18 @@ export class UnsplashService {
         retry(1),
         map((resp: HttpResponse<SearchPhotosResponse>) => {
           let responseMap;
-          // const linkHeader = resp.headers.get('Link') || '';
-          // console.log('test', resp);
-          // console.log('linkHeader', linkHeader);
-
-          // const page = parseLinkHeader(linkHeader);
-          // console.log('page', page);
-          // console.log('resp', resp.body);
-
           responseMap = {
             data: resp.body?.results ?? [],
             page: resp.body?.total_pages ?? 0,
           };
 
           return responseMap ?? [];
-        })
+        }),
+        catchError(this.handleError)
       );
   }
 
-  private handleError(error: HttpErrorResponse) {
+  private handleError = (error: HttpErrorResponse) => {
     if (error.error instanceof ErrorEvent) {
       console.error('Client error:', error.error.message);
     } else {
@@ -237,7 +222,7 @@ export class UnsplashService {
     return throwError(
       () => new Error('Что-то пошло не так; попробуйте позже.')
     );
-  }
+  };
 }
 
 function parseLinkHeader(header: string): Record<string, number> {

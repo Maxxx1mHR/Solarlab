@@ -15,26 +15,22 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from './environments/environment';
+import { NzConfig, provideNzConfig } from 'ng-zorro-antd/core/config';
+import { NZ_I18N, ru_RU, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
+const ngZorroConfig: NzConfig = {};
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
-  const token = localStorage.getItem('jwt');
   const cloned = req.clone({
     setHeaders: {
-      Authorization: `Authorization Client-ID FnieF2cE1XmcUbwwVsk1MkINfQqxZhyEoTMrJs7i59s`,
+      Authorization: `Authorization Client-ID ${environment.apiKey}`,
     },
   });
   return next(cloned);
-  // return next(req);
-  // const reqWithHeader = req.clone({
-  //   headers: req.headers.set(
-  //     'Authorization',
-  //     'Client-ID FnieF2cE1XmcUbwwVsk1MkINfQqxZhyEoTMrJs7i59s'
-  //   ),
-  // });
-  // return next(reqWithHeader);
 };
 
 export const appConfig: ApplicationConfig = {
@@ -42,7 +38,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    // provideHttpClient(),
     provideHttpClient(withInterceptors([authInterceptor])),
+    provideNzConfig(ngZorroConfig),
+    { provide: NZ_I18N, useValue: ru_RU },
+    provideAnimations(),
   ],
 };
