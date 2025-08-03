@@ -1,0 +1,21 @@
+<!-- <ng-container *ngIf="photos | async as photos; else loading">
+  <div class="grid">
+    <div *ngFor="let p of photos" class="photo-card">
+      <img [src]="p.urls.small" [alt]="p.alt_description || 'photo'" />
+      <div class="meta">
+        <div>{{ p.user.name }}</div>
+        <div>{{ p.description || p.alt_description }}</div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+<ng-template #loading>Загрузка...</ng-template> -->
+
+<input type="text" [(ngModel)]="test" (input)="testFn(test)" />
+<div *ngIf="photos">
+  <div *ngFor="let photo of photos.data">
+    <div>
+      <img [src]="photo.urls.thumb" alt="image" />
+    </div>
+  </div>
+</div>
