@@ -1,7 +1,7 @@
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
-  provideZoneChangeDetection,
+  provideZoneChangeDetection, importProvidersFrom,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
@@ -17,9 +17,15 @@ import {
 import { Observable } from 'rxjs';
 import { environment } from './environments/environment';
 import { NzConfig, provideNzConfig } from 'ng-zorro-antd/core/config';
-import { NZ_I18N, ru_RU, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
+import { NZ_I18N, ru_RU, en_US, NzI18nService, provideNzI18n } from 'ng-zorro-antd/i18n';
 const ngZorroConfig: NzConfig = {};
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { registerLocaleData } from '@angular/common';
+import ru from '@angular/common/locales/ru';
+import { FormsModule } from '@angular/forms';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+
+registerLocaleData(ru);
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -41,6 +47,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideNzConfig(ngZorroConfig),
     { provide: NZ_I18N, useValue: ru_RU },
-    provideAnimations(),
+    provideAnimations(), provideNzI18n(ru_RU), importProvidersFrom(FormsModule), provideAnimationsAsync(), provideHttpClient(),
   ],
 };
