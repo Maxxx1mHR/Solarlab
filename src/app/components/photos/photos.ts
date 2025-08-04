@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
-import {
-  PhotosResponse,
-  UnsplashService,
-} from '../../service/unsplash-service';
+import { UnsplashService } from '../../service/unsplash-service';
 import { finalize, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +8,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { debounce } from '../../utils/debounce';
+import { PhotosResponse } from '../../types/photo';
 
 @Component({
   selector: 'app-photos',
@@ -37,7 +36,7 @@ export class Photos {
   isLoading = false;
 
   constructor(private api: UnsplashService) {
-    this.handleInput = this.debounce(this.onInput, 280);
+    this.handleInput = debounce(this.onInput, 280);
   }
 
   totalItems() {
@@ -60,21 +59,9 @@ export class Photos {
       next: (data: PhotosResponse) => {
         this.photos = data;
       },
-      error: (err) => console.log('error', err),
+      error: (error) => console.log('error', error),
     });
   }
-
-  debounce = <T extends string[]>(fn: (...args: T) => void, ms: number) => {
-    let timeout: ReturnType<typeof setTimeout>;
-
-    return function (...args: T) {
-      const fnCall = () => {
-        fn(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(fnCall, ms);
-    };
-  };
 
   onInput = (): void => {
     this.page = 1;
