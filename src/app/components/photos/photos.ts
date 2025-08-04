@@ -10,6 +10,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { debounce } from '../../utils/debounce';
 import { PhotosResponse } from '../../types/photo';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @Component({
   selector: 'app-photos',
@@ -21,6 +22,7 @@ import { PhotosResponse } from '../../types/photo';
     NzPaginationModule,
     NzLayoutModule,
     NzInputModule,
+    NzSpinModule,
   ],
   templateUrl: './photos.html',
   styleUrl: './photos.scss',

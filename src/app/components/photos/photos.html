@@ -8,7 +8,7 @@
     />
   </nz-header>
   <nz-content class="content">
-    <div *ngIf="photos">
+    <div *ngIf="photos && !isLoading">
       <div *ngIf="photos">
         <div class="wrapper">
           <div *ngFor="let photo of photos.data">
@@ -27,6 +27,9 @@
         </div>
       </div>
     </div>
+    <div class="loader" *ngIf="isLoading">
+      <nz-spin nzSimple nzSize="large"></nz-spin>
+    </div>
   </nz-content>
   <nz-footer>
     <nz-pagination
@@ -37,6 +40,7 @@
       nzShowSizeChanger
       [nzPageSizeOptions]="[10, 25]"
       (nzPageSizeChange)="changePageSize($event)"
+      [nzDisabled]="isLoading"
     ></nz-pagination
   ></nz-footer>
 </nz-layout>
